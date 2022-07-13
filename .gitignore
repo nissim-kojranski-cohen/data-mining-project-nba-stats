@@ -1,0 +1,4 @@
+*.csv
+*.log
+__pycache__
+venv_data_mining

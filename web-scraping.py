@@ -41,6 +41,10 @@ def parse_html(response):
     for index, row in enumerate(response):
         got_player_data = True
         tmp_dict = {}
+        # creating unique id for each player
+        player_html = row.find_all("a")[0].get("href")
+        player_id = player_html[:-5].split('/')[-1]
+        tmp_dict['player_id'] = player_id
         cols = row.find_all("td")
         if len(cols) == 0:
             logging.critical("Table contains no columns")
@@ -77,7 +81,7 @@ def export_data_to_csv(year, list_of_dicts):
 
 
 def main():
-    for year in range(config.YEAR_START, config.YEAR_END):
+    for year in range(config.YEAR_START, config.YEAR_END + 1):
         print(f'Starting web scrapping for NBA players year {year}')
         try:
             html_response = get_html(year)

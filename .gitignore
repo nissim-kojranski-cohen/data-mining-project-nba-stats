@@ -3,3 +3,4 @@
 __pycache__
 venv_data_mining
 project_details.txt
+*.exe

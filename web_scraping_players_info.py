@@ -3,15 +3,51 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import config
+from web_scraping_players_stats import get_html, parse_html
 
 pd.set_option('display.max_columns', 500)
-SEASON = 2022
+SEASON = 2021
+FEET_TO_CM = 30.48
+INCHES_TO_CM = 2.54
+POUNDS_TO_KG = 0.453592
+WAITING_TIME_SELENIUM = 60
+
+def convert_feet_inches_to_cm(feet_inches):
+    """ Converts str(feet-inches) to cm"""
+    try:
+        feet, inches = feet_inches.split('-')
+        return int(feet)*FEET_TO_CM + int(inches)*INCHES_TO_CM
+    except:
+        return 0
 
 
-def get_nba_players_data(season):
+def convert_pounds_to_kg(pounds):
+    """ Converts pounds to cm"""
+    try:
+        return pounds*POUNDS_TO_KG
+    except:
+        return 0
+
+
+def get_nba_players_ids(season):
+    """
+    Gets NBA players ids on Basketball Reference Website (primary key used for players in the project)
+    :param season:
+    :return:
+    """
+    html_ids = get_html(season, config.URL_END_TOTALS)
+    parsed_ids = parse_html(html_ids)
+    df_ids = pd.DataFrame(parsed_ids)
+    df_ids = df_ids[['player_id', 'player']]
+    df_ids.to_csv('player_ids.csv')
+    return df_ids
+
+
+def get_nba_players_data(season, df_ids):
     """
     Extracts all players details according to the season
-    :param season:
+    :param season: year of the season to get the players information
     :return:
     """
     season_abrev = int(str(season)[2:])
@@ -34,7 +70,7 @@ def get_nba_players_data(season):
 
     xpath_dropdown_pages = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div'
     try:
-        dropdown_pages = WebDriverWait(driver, 1.5).until(EC.visibility_of_element_located((By.XPATH,
+        dropdown_pages = WebDriverWait(driver, WAITING_TIME_SELENIUM).until(EC.visibility_of_element_located((By.XPATH,
                                                                                             xpath_dropdown_pages)))
         num_pages = int(dropdown_pages.text.split()[-1])
     except Exception as exc:
@@ -46,7 +82,7 @@ def get_nba_players_data(season):
     while True:
         table_xpath = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[2]/div[1]/table'
         try:
-            table = WebDriverWait(driver, 1.5).until(EC.visibility_of_element_located((By.XPATH, table_xpath)))
+            table = WebDriverWait(driver, WAITING_TIME_SELENIUM).until(EC.visibility_of_element_located((By.XPATH, table_xpath)))
             table_html = table.get_attribute('outerHTML')
             tmp_df = pd.read_html(table_html)[0]
         except Exception as exc:
@@ -64,7 +100,7 @@ def get_nba_players_data(season):
         else:
             next_xpath = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div/a[2]'
             try:
-                next_button = WebDriverWait(driver, 1.5).until(EC.visibility_of_element_located((By.XPATH, next_xpath)))
+                next_button = WebDriverWait(driver, WAITING_TIME_SELENIUM).until(EC.visibility_of_element_located((By.XPATH, next_xpath)))
                 next_button.click()
                 page_num += 1
             except Exception as exc:
@@ -72,33 +108,40 @@ def get_nba_players_data(season):
                 raise Exception(exc)
 
     driver.close()
-    df = df[['Player', 'Team', 'Age', 'Height', 'Weight', 'College', 'Country', 'Draft Year', 'Draft Round',
-             'Draft Number']]
     df = df.reset_index()
     df = df.drop(columns=['index'])
-    return df
 
-
-def get_player_id(SEASON):
-    # TODO: instead of reading from player_ids.xlsx (excel file with two cols - player_id and player)
-    # do it from executing functions from web_scrapping
-    df_ids = pd.read_excel('player_ids.xlsx')
-    df_data = get_nba_players_data(SEASON)
-    df = pd.merge(df_data, df_ids, how='inner', left_on='Player', right_on='player') #inner joins get only rows with values on both tables
+    #joins with players ids
+    df = pd.merge(df, df_ids, how='inner', left_on='Player',
+                  right_on='player')  # inner joins get only rows with values on both tables
     df = df[['player_id', 'Team', 'Age', 'Height', 'Weight', 'College', 'Country', 'Draft Year', 'Draft Round',
              'Draft Number']]
     df = df.rename(columns={'Team': 'team', 'Age': 'age', 'Height': 'height', 'Weight': 'weight', 'College': 'college',
                             'Country': 'country', 'Draft Year': 'draft_year', 'Draft Round': 'draft_round',
                             'Draft Number': 'draft_number'})
-    df.to_csv('players_bio.csv')
+    df['height'] = df.apply(lambda x: convert_feet_inches_to_cm(x['height']), axis=1)
+    df['weight'] = df.apply(lambda x: convert_pounds_to_kg(x['weight']), axis=1)
+    return df
 
 
 def main():
-    try:
-        get_player_id(SEASON)
-    except Exception as exc:
-        print('Exception found:', exc)
+    create_dfs = True
+    for year in range(config.YEAR_START, config.YEAR_END + 1):
+        print(f'Starting to run for {year}')
+        if create_dfs:
+            df_ids = get_nba_players_ids(year)
+            df_nba_players_info = get_nba_players_data(year, df_ids)
+            create_dfs = False
+        else:
+            tmp_df_ids = get_nba_players_ids(year)
+            tmp_df_nba_players_info = get_nba_players_data(year, df_ids)
+            df_nba_players_info = pd.concat([df_nba_players_info, tmp_df_nba_players_info])
+            df_ids = pd.concat([df_ids, tmp_df_ids])
+            df_nba_players_info = df_nba_players_info.drop_duplicates('player_id', keep='last')
+            df_ids = df_ids.drop_duplicates('player_id', keep='last')
 
+    df_nba_players_info.to_csv('players_info.csv')
+    df_ids.to_csv('players_id.csv')
 
 if __name__ == "__main__":
     main()

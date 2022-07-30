@@ -7,3 +7,7 @@ YEAR_START = 2015
 YEAR_END = 2022
 LOG_FORMAT = '%(asctime)s:%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d:%(message)s'
 DATABASE_NAME = 'nba_data'
+FEET_TO_CM = 30.48
+INCHES_TO_CM = 2.54
+POUNDS_TO_KG = 0.453592
+WAITING_TIME_SELENIUM = 60

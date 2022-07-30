@@ -7,17 +7,13 @@ import config
 from web_scraping_players_stats import get_html, parse_html
 
 pd.set_option('display.max_columns', 500)
-SEASON = 2021
-FEET_TO_CM = 30.48
-INCHES_TO_CM = 2.54
-POUNDS_TO_KG = 0.453592
-WAITING_TIME_SELENIUM = 60
+
 
 def convert_feet_inches_to_cm(feet_inches):
     """ Converts str(feet-inches) to cm"""
     try:
         feet, inches = feet_inches.split('-')
-        return int(feet)*FEET_TO_CM + int(inches)*INCHES_TO_CM
+        return int(feet) * config.FEET_TO_CM + int(inches) * config.INCHES_TO_CM
     except:
         return 0
 
@@ -25,7 +21,7 @@ def convert_feet_inches_to_cm(feet_inches):
 def convert_pounds_to_kg(pounds):
     """ Converts pounds to cm"""
     try:
-        return pounds*POUNDS_TO_KG
+        return pounds * config.POUNDS_TO_KG
     except:
         return 0
 
@@ -70,8 +66,9 @@ def get_nba_players_data(season, df_ids):
 
     xpath_dropdown_pages = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div'
     try:
-        dropdown_pages = WebDriverWait(driver, WAITING_TIME_SELENIUM).until(EC.visibility_of_element_located((By.XPATH,
-                                                                                            xpath_dropdown_pages)))
+        dropdown_pages = WebDriverWait(driver, config.WAITING_TIME_SELENIUM).until(
+            EC.visibility_of_element_located((By.XPATH,
+                                              xpath_dropdown_pages)))
         num_pages = int(dropdown_pages.text.split()[-1])
     except Exception as exc:
         print(f'Could not get dropdown limit, xpath= {xpath_dropdown_pages}')
@@ -82,7 +79,8 @@ def get_nba_players_data(season, df_ids):
     while True:
         table_xpath = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[2]/div[1]/table'
         try:
-            table = WebDriverWait(driver, WAITING_TIME_SELENIUM).until(EC.visibility_of_element_located((By.XPATH, table_xpath)))
+            table = WebDriverWait(driver, config.WAITING_TIME_SELENIUM).until(
+                EC.visibility_of_element_located((By.XPATH, table_xpath)))
             table_html = table.get_attribute('outerHTML')
             tmp_df = pd.read_html(table_html)[0]
         except Exception as exc:
@@ -100,7 +98,8 @@ def get_nba_players_data(season, df_ids):
         else:
             next_xpath = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div/a[2]'
             try:
-                next_button = WebDriverWait(driver, WAITING_TIME_SELENIUM).until(EC.visibility_of_element_located((By.XPATH, next_xpath)))
+                next_button = WebDriverWait(driver, config.WAITING_TIME_SELENIUM).until(
+                    EC.visibility_of_element_located((By.XPATH, next_xpath)))
                 next_button.click()
                 page_num += 1
             except Exception as exc:
@@ -111,7 +110,7 @@ def get_nba_players_data(season, df_ids):
     df = df.reset_index()
     df = df.drop(columns=['index'])
 
-    #joins with players ids
+    # joins with players ids
     df = pd.merge(df, df_ids, how='inner', left_on='Player',
                   right_on='player')  # inner joins get only rows with values on both tables
     df = df[['player_id', 'Team', 'Age', 'Height', 'Weight', 'College', 'Country', 'Draft Year', 'Draft Round',
@@ -142,6 +141,7 @@ def main():
 
     df_nba_players_info.to_csv('players_info.csv')
     df_ids.to_csv('players_id.csv')
+
 
 if __name__ == "__main__":
     main()

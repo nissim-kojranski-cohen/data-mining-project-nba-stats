@@ -63,6 +63,8 @@ def to_players_table(filename):
     with open(filename, encoding='utf-8') as file:
         # extract year and stat type from file name
         table_name = filename.split('.')[0]
+        if table_name == 'players_id':
+            table_name = 'players'
 
         # read the csv
         reader = csv.DictReader(file)
@@ -78,7 +80,7 @@ def to_players_table(filename):
                     pass
                 elif key in varchar_cols:
                     row_data.append(player_data[key])
-                elif player_data[key] == '':
+                elif player_data[key] == '' or player_data[key] == 'Undrafted':
                     row_data.append(None)
                 else:
                     row_data.append(float(player_data[key]))

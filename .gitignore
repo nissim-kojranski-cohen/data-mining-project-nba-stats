@@ -5,4 +5,3 @@ venv_data_mining
 project_details.txt
 *.exe
 sql_config.py
-password.py

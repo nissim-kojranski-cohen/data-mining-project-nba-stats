@@ -54,6 +54,52 @@ def to_stats_table(filename):
                 connection.commit()
 
 
+def to_players_table(filename):
+    """
+    takes csv file and insert it to the appropriate mysql table in nba_data db
+    :param filename: string representing the file name
+    :return: None
+    """
+    with open(filename, encoding='utf-8') as file:
+        # extract year and stat type from file name
+        table_name = filename.split('.')[0]
+
+        # read the csv
+        reader = csv.DictReader(file)
+        # store each dictionary (representing a player) to tupel list
+        tup_list = []
+        varchar_cols = ['player_id', 'team', 'college', 'country', 'player']
+        omited_cols = []
+        for index, player_data in enumerate(reader):
+            # creating a list for each row by its value type
+            row_data = []
+            for key in player_data:
+                if key in omited_cols:
+                    pass
+                elif key in varchar_cols:
+                    row_data.append(player_data[key])
+                elif player_data[key] == '':
+                    row_data.append(None)
+                else:
+                    row_data.append(float(player_data[key]))
+            # saving the row data to tuple and storing in tup_list
+            tup_list.append(tuple(row_data))
+
+        # connecting to mysql server
+        connection = pymysql.connect(host=sql_config.HOST,
+                                     user=sql_config.USER,
+                                     password=sql_config.PASSWORD,
+                                     database=sql_config.DATABASE_NAME)
+
+        # inserting the data to mysql table
+        with connection:
+            with connection.cursor() as cursor:
+                col_num = '%s, ' * len(tup_list[0])
+                stmt = f"INSERT INTO {table_name} VALUES ({col_num[:-2]})"
+                cursor.executemany(stmt, tup_list)
+                connection.commit()
+
+
 def main():
     current_path = pathlib.Path().resolve()
     # list of all files in current directory
@@ -62,6 +108,10 @@ def main():
         # insert all stats csv files to mysql tables
         if file.endswith('.csv') and file.startswith('sample'):
             to_stats_table(file)
+    for file in onlyfiles:
+        # insert all player info csv files to mysql tables
+        if file.endswith('.csv') and file.startswith('players'):
+            to_players_table(file)
 
 
 if __name__ == "__main__":

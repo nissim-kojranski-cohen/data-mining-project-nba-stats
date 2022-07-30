@@ -194,9 +194,9 @@ def create_table_stats_per_minute(host, user, password, database_name):
     connection.commit()
 
 
-def create_table_stats_per_possession(host, user, password, database_name):
+def create_table_stats_per_poss(host, user, password, database_name):
     """
-    Creates table 'stats_per_possession' in the database
+    Creates table 'stats_per_poss' in the database
     :param host: name of the host
     :param user: name of the user
     :param password: MySQL password
@@ -204,7 +204,7 @@ def create_table_stats_per_possession(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE stats_per_possession (
+        sql = """CREATE TABLE stats_per_poss (
               player_id varchar(100),
               pos varchar(100),
               team_season varchar(100),
@@ -237,9 +237,9 @@ def create_table_stats_per_possession(host, user, password, database_name):
     connection.commit()
 
 
-def create_table_stats_total(host, user, password, database_name):
+def create_table_stats_totals(host, user, password, database_name):
     """
-    Creates table 'stats_total' in the database
+    Creates table 'stats_totals' in the database
     :param host: name of the host
     :param user: name of the user
     :param password: MySQL password
@@ -247,7 +247,7 @@ def create_table_stats_total(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE stats_total (
+        sql = """CREATE TABLE stats_totals (
               player_id varchar(100),
               pos varchar(100),
               team_season varchar(100),
@@ -285,7 +285,7 @@ def build_database_with_tables(host, user, password, database_name):
     """
     Executes all commands to build the database schema for nba_data
     Created tables names: 'players', 'players_info', 'teams', 'stats_per_game', 'stats_per_minute',
-    'stats_per_possessions', 'stats_total'
+    'stats_per_poss', 'stats_totals'
     :param host: name of the host
     :param user: name of the user
     :param password: MySQL password
@@ -297,8 +297,8 @@ def build_database_with_tables(host, user, password, database_name):
     create_table_teams(host=host, user=user, password=password, database_name=database_name)
     create_table_stats_per_game(host=host, user=user, password=password, database_name=database_name)
     create_table_stats_per_minute(host=host, user=user, password=password, database_name=database_name)
-    create_table_stats_per_possession(host=host, user=user, password=password, database_name=database_name)
-    create_table_stats_total(host=host, user=user, password=password, database_name=database_name)
+    create_table_stats_per_poss(host=host, user=user, password=password, database_name=database_name)
+    create_table_stats_totals(host=host, user=user, password=password, database_name=database_name)
 
 
 if __name__ == "__main__":

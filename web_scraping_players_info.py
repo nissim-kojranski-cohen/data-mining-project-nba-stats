@@ -139,8 +139,8 @@ def main():
             df_nba_players_info = df_nba_players_info.drop_duplicates('player_id', keep='last')
             df_ids = df_ids.drop_duplicates('player_id', keep='last')
 
-    df_nba_players_info.to_csv('players_info.csv')
-    df_ids.to_csv('players_id.csv')
+    df_nba_players_info.to_csv('players_info.csv', index=None)
+    df_ids.to_csv('players_id.csv', index=None)
 
 
 if __name__ == "__main__":

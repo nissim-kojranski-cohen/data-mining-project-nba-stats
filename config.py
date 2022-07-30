@@ -6,3 +6,4 @@ URL_END_PER100POSS = '_per_possession.html'
 YEAR_START = 2021
 YEAR_END = 2022
 LOG_FORMAT = '%(asctime)s:%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d:%(message)s'
+DATABASE_NAME = 'nba_data'

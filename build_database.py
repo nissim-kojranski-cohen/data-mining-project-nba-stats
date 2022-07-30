@@ -4,6 +4,14 @@ import sql_config
 
 
 def create_connection(host, user, password):
+    """
+    Creates connection to SQL without specifying the database name
+    Used only for creation of the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :return: instance of a pymysql connection
+    """
     return pymysql.connect(host=host,
                            user=user,
                            password=password,
@@ -11,6 +19,14 @@ def create_connection(host, user, password):
 
 
 def create_connection_db(host, user, password, database_name):
+    """
+    Creates connection to SQL with specified database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    :return: instance of a pymysql connection
+    """
     return pymysql.connect(host=host,
                            user=user,
                            password=password,
@@ -19,6 +35,13 @@ def create_connection_db(host, user, password, database_name):
 
 
 def create_database(host, user, password, database_name):
+    """
+    Creates a new database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection(host, user, password)
     with connection.cursor() as cursor:
         sql = f"CREATE DATABASE {database_name}"
@@ -26,6 +49,13 @@ def create_database(host, user, password, database_name):
 
 
 def create_table_players(host, user, password, database_name):
+    """
+    Creates table 'players' in the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
         sql = """CREATE TABLE players (
@@ -36,6 +66,13 @@ def create_table_players(host, user, password, database_name):
 
 
 def create_table_players_info(host, user, password, database_name):
+    """
+    Creates table 'players_info' in the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
         sql = """CREATE TABLE players_info (
@@ -54,6 +91,13 @@ def create_table_players_info(host, user, password, database_name):
 
 
 def create_table_teams(host, user, password, database_name):
+    """
+    Creates table 'teams' in the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
         sql = """CREATE TABLE teams (
@@ -64,6 +108,13 @@ def create_table_teams(host, user, password, database_name):
 
 
 def create_table_stats_per_game(host, user, password, database_name):
+    """
+    Creates table 'stats_per_game' in the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
         sql = """CREATE TABLE stats_per_game (
@@ -101,6 +152,13 @@ def create_table_stats_per_game(host, user, password, database_name):
 
 
 def create_table_stats_per_minute(host, user, password, database_name):
+    """
+    Creates table 'stats_per_minute' in the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
         sql = """CREATE TABLE stats_per_minute (
@@ -137,6 +195,13 @@ def create_table_stats_per_minute(host, user, password, database_name):
 
 
 def create_table_stats_per_possession(host, user, password, database_name):
+    """
+    Creates table 'stats_per_possession' in the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
         sql = """CREATE TABLE stats_per_possession (
@@ -173,6 +238,13 @@ def create_table_stats_per_possession(host, user, password, database_name):
 
 
 def create_table_stats_total(host, user, password, database_name):
+    """
+    Creates table 'stats_total' in the database
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
         sql = """CREATE TABLE stats_total (
@@ -210,6 +282,15 @@ def create_table_stats_total(host, user, password, database_name):
 
 
 def build_database_with_tables(host, user, password, database_name):
+    """
+    Executes all commands to build the database schema for nba_data
+    Created tables names: 'players', 'players_info', 'teams', 'stats_per_game', 'stats_per_minute',
+    'stats_per_possessions', 'stats_total'
+    :param host: name of the host
+    :param user: name of the user
+    :param password: MySQL password
+    :param database_name: name of the database
+    """
     create_database(host=host, user=user, password=password, database_name=database_name)
     create_table_players(host=host, user=user, password=password, database_name=database_name)
     create_table_players_info(host=host, user=user, password=password, database_name=database_name)

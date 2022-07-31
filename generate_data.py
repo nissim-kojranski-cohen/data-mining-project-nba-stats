@@ -9,7 +9,7 @@ def caller(year_start, year_end):
     print('Starting web_scraping_players_stats')
     web_scraping_players_stats.main(year_start, year_end)
     print('Starting web_scraping_players_info')
-    web_scraping_players_info.main(year_start, year_end)
+    web_scraping_players_info.export_players_info(year_start, year_end)
     print('Starting build_database')
     build_database.build_database_with_tables()
     print('Starting to_database_tables')

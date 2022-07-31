@@ -36,7 +36,6 @@ def get_nba_players_ids(season):
     parsed_ids = parse_html(html_ids)
     df_ids = pd.DataFrame(parsed_ids)
     df_ids = df_ids[['player_id', 'player']]
-    df_ids.to_csv('player_ids.csv')
     return df_ids
 
 

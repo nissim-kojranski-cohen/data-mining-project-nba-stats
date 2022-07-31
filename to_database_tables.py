@@ -103,7 +103,7 @@ def to_players_table(filename):
                 connection.commit()
 
 
-def main():
+def write_to_tables():
     current_path = pathlib.Path().resolve()
     # list of all files in current directory
     onlyfiles = [f for f in os.listdir(current_path) if os.path.isfile(os.path.join(current_path, f))]

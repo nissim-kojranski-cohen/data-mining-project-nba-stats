@@ -7,13 +7,13 @@ import to_database_tables
 
 def caller(year_start, year_end):
     print('Starting web_scraping_players_stats')
-    web_scraping_players_stats.main(year_start, year_end)
+    web_scraping_players_stats.export_players_stats(year_start, year_end)
     print('Starting web_scraping_players_info')
     web_scraping_players_info.export_players_info(year_start, year_end)
     print('Starting build_database')
     build_database.build_database_with_tables()
     print('Starting to_database_tables')
-    to_database_tables.main()
+    to_database_tables.write_to_tables()
 
 def generate_data():
     my_parser = argparse.ArgumentParser()

@@ -84,7 +84,7 @@ def export_data_to_csv(year, list_of_dicts, stat_type):
             logging.info(f"data for player {dict_['player']} saved successfully")
 
 
-def main(year_start=config.YEAR_START, year_end=config.YEAR_END):
+def export_players_stats(year_start=config.YEAR_START, year_end=config.YEAR_END):
     # type of stats to scrape
     stat_extensions = [config.URL_END_TOTALS, config.URL_END_PERGAME, config.URL_END_PER36, config.URL_END_PER100POSS]
     # iterating over stat types

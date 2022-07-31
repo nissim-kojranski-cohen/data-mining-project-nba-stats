@@ -3,6 +3,7 @@ import csv
 import pymysql
 import os
 import pathlib
+import config
 
 
 def to_stats_table(filename):
@@ -22,7 +23,7 @@ def to_stats_table(filename):
         tup_list = []
         for index, player_data in enumerate(reader):
             varchar_cols = ['player_id', 'pos', 'team_id']
-            omited_cols = ['player', 'age']
+            omited_cols = ['', 'player', 'age']
             # creating a list for each row by its value type
             row_data = []
             for key in player_data:
@@ -43,7 +44,7 @@ def to_stats_table(filename):
         connection = pymysql.connect(host=sql_config.HOST,
                                      user=sql_config.USER,
                                      password=sql_config.PASSWORD,
-                                     database=sql_config.DATABASE_NAME)
+                                     database=config.DATABASE_NAME)
 
         # inserting the data to mysql table
         with connection:
@@ -71,7 +72,7 @@ def to_players_table(filename):
         # store each dictionary (representing a player) to tupel list
         tup_list = []
         varchar_cols = ['player_id', 'team', 'college', 'country', 'player']
-        omited_cols = []
+        omited_cols = ['']
         for index, player_data in enumerate(reader):
             # creating a list for each row by its value type
             row_data = []
@@ -91,7 +92,7 @@ def to_players_table(filename):
         connection = pymysql.connect(host=sql_config.HOST,
                                      user=sql_config.USER,
                                      password=sql_config.PASSWORD,
-                                     database=sql_config.DATABASE_NAME)
+                                     database=config.DATABASE_NAME)
 
         # inserting the data to mysql table
         with connection:

@@ -232,7 +232,9 @@ def create_table_stats_per_poss(host, user, password, database_name):
               blk_per_poss decimal(18,9),
               tov_per_poss decimal(18,9),
               pf_per_poss decimal(18,9),
-              pts_per_poss decimal(18,9))"""
+              pts_per_poss decimal(18,9),
+              off_rtg decimal(18,9),
+              def_rtg decimal(18,9))"""
         cursor.execute(sql)
     connection.commit()
 

@@ -118,4 +118,4 @@ def write_to_tables():
 
 
 if __name__ == "__main__":
-    main()
+    write_to_tables()

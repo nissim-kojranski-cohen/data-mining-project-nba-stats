@@ -9,6 +9,12 @@ logging.basicConfig(filename='nba_web_scrapping.log', encoding='utf-8', level=lo
 
 
 def get_html(year, stat_extension):
+    """
+    Obtains the html according to the stat_extension and year
+    :param year: year the season finished
+    :param stat_extension: type of stat(totals, per_game, per_minute, per_poss)
+    :return: html of the table with the statistics
+    """
     url = ''.join([config.URL_BEG, str(year), stat_extension])
     response = requests.get(url)
     if response.status_code != 200:
@@ -36,6 +42,11 @@ def get_html(year, stat_extension):
         
 
 def parse_html(response):
+    """
+    Parses the response of an html of table with statistics
+    :param response: html of the table
+    :return: a list of dicts where each dict is equivalent to a table row with statistics of a player
+    """
     list_of_dicts = []
     len_response = len(response)
     # iterating over soup object, each row contains one player stats
@@ -69,6 +80,12 @@ def parse_html(response):
 
 
 def export_data_to_csv(year, list_of_dicts, stat_type):
+    """
+    Saves tables with statistics to a csv file
+    :param year: year the season finished
+    :param list_of_dicts: a list of dicts where each dict is equivalent to a table row with statistics of a player
+    :param stat_type: type of stat(totals, per_game, per_minute, per_poss)
+    """
     if len(list_of_dicts) == 0 or list_of_dicts is None:
         logging.critical("List of dictionaries contain no data")
         raise TypeError("List of dictionaries contain no data")
@@ -84,7 +101,12 @@ def export_data_to_csv(year, list_of_dicts, stat_type):
             logging.info(f"data for player {dict_['player']} saved successfully")
 
 
-def main(year_start=config.YEAR_START, year_end=config.YEAR_END):
+def export_players_stats(year_start=config.YEAR_START, year_end=config.YEAR_END):
+    """
+    Export files with players statistics from Basketball Reference to csv according to a range of years
+    :param year_start: year that the program will start scraping for
+    :param year_end: last year that the program will scrape for
+    """
     # type of stats to scrape
     stat_extensions = [config.URL_END_TOTALS, config.URL_END_PERGAME, config.URL_END_PER36, config.URL_END_PER100POSS]
     # iterating over stat types
@@ -106,4 +128,4 @@ def main(year_start=config.YEAR_START, year_end=config.YEAR_END):
 
 
 if __name__ == "__main__":
-    main()
+    export_players_stats()

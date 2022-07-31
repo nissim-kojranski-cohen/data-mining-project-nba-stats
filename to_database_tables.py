@@ -103,6 +103,55 @@ def to_players_table(filename):
                 connection.commit()
 
 
+def to_teams_table():
+    """ inserts data to teams table """
+    teams_tup_list = [('ATL', 'Atlanta Hawks'),
+                      ('BOS', 'Boston Celtics'),
+                      ('BRK', 'Brooklyn Nets'),
+                      ('CHI', 'Charlotte Hornets'),
+                      ('CHO', 'Chicago Bulls'),
+                      ('CLE', 'Cleveland Cavaliers'),
+                      ('DAL', 'Dallas Mavericks'),
+                      ('DEN', 'Denver Nuggets'),
+                      ('DET', 'Detroit Pistons'),
+                      ('GSW', 'Golden State Warriors'),
+                      ('HOU', 'Houston Rockets'),
+                      ('IND', 'Indiana Pacers'),
+                      ('LAC', 'LA Clippers'),
+                      ('LAL', 'Los Angeles Lakers'),
+                      ('MEM', 'Memphis Grizzlies'),
+                      ('MIA', 'Miami Heat'),
+                      ('MIL', 'Milwaukee Bucks'),
+                      ('MIN', 'Minnesota Timberwolves'),
+                      ('NOP', 'New Orleans Pelicans'),
+                      ('NYK', 'New York Knicks'),
+                      ('OKC', 'Oklahoma City Thunder'),
+                      ('ORL', 'Orlando Magic'),
+                      ('PHI', 'Philadelphia 76ers'),
+                      ('PHO', 'Phoenix Suns'),
+                      ('POR', 'Portland Trail Blazers'),
+                      ('SAC', 'Sacramento Kings'),
+                      ('SAS', 'San Antonio Spurs'),
+                      ('TOR', 'Toronto Raptors'),
+                      ('TOT', 'Total'),
+                      ('UTA', 'Utah Jazz'),
+                      ('WAS', 'Washington Wizards')]
+
+    # connecting to mysql server
+    connection = pymysql.connect(host=sql_config.HOST,
+                                 user=sql_config.USER,
+                                 password=sql_config.PASSWORD,
+                                 database=config.DATABASE_NAME)
+
+    # inserting the data to mysql table
+    with connection:
+        with connection.cursor() as cursor:
+            col_num = '%s, ' * len(teams_tup_list[0])
+            stmt = f"INSERT INTO teams VALUES ({col_num[:-2]})"
+            cursor.executemany(stmt, teams_tup_list)
+            connection.commit()
+
+
 def main():
     current_path = pathlib.Path().resolve()
     # list of all files in current directory
@@ -115,6 +164,7 @@ def main():
         # insert all player info csv files to mysql tables
         if file.endswith('.csv') and file.startswith('players'):
             to_players_table(file)
+    to_teams_table()
 
 
 if __name__ == "__main__":

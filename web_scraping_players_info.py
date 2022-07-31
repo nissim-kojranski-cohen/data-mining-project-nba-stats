@@ -122,9 +122,9 @@ def get_nba_players_data(season, df_ids):
     return df
 
 
-def main():
+def main(year_start=config.YEAR_START, year_end=config.YEAR_END):
     create_dfs = True
-    for year in range(config.YEAR_START, config.YEAR_END + 1):
+    for year in range(year_start, year_end + 1):
         print(f'Starting to run for {year}')
         if create_dfs:
             df_ids = get_nba_players_ids(year)

@@ -281,7 +281,8 @@ def create_table_stats_totals(host, user, password, database_name):
     connection.commit()
 
 
-def build_database_with_tables(host, user, password, database_name):
+def build_database_with_tables(host=sql_config.HOST, user=sql_config.USER, password=sql_config.PASSWORD,
+                               database_name=config.DATABASE_NAME):
     """
     Executes all commands to build the database schema for nba_data
     Created tables names: 'players', 'players_info', 'teams', 'stats_per_game', 'stats_per_minute',

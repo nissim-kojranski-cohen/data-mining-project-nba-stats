@@ -84,14 +84,14 @@ def export_data_to_csv(year, list_of_dicts, stat_type):
             logging.info(f"data for player {dict_['player']} saved successfully")
 
 
-def main():
+def main(year_start=config.YEAR_START, year_end=config.YEAR_END):
     # type of stats to scrape
     stat_extensions = [config.URL_END_TOTALS, config.URL_END_PERGAME, config.URL_END_PER36, config.URL_END_PER100POSS]
     # iterating over stat types
     for ext in stat_extensions:
         stat_type = ext.split('.')[0]
         # iterating over years
-        for year in range(config.YEAR_START, config.YEAR_END + 1):
+        for year in range(year_start, year_end + 1):
             print(f'Starting web scrapping for NBA players {ext[1:-5]} year {year}')
             try:
                 # get url response

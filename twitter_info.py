@@ -2,63 +2,64 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import config
-import logging
 import os
 import json
 import pandas as pd
+import logging
+import config
+import pvt_data_config
 
-TOKEN = "AAAAAAAAAAAAAAAAAAAAAFj9fwEAAAAALn3C3fhbxF9eFnPtE13yL5LLjI8%3D9gxlzjWtbsXOn8qN5367rbQ9iggDy170crEEvC0eRsA1n9QQ1l"
-bearer_token = TOKEN
+logging.basicConfig(filename='nba_twitter_api.log', encoding='utf-8', level=logging.INFO, format=config.LOG_FORMAT)
 
 
 def create_url(users):
-    # Specify the usernames that you want to lookup below
-    # You can enter up to 100 comma-separated values.
+    """ Returns URL that will be used to request players details in the twitter API """
+    # asserts do not exceed api limit
+    assert len(users) <= config.TWITTER_USERS_LIMIT_API
+
     users = ','.join(users)
     usernames = f"usernames={users}"
     user_fields = "user.fields=description,created_at,public_metrics"
-    # User fields are adjustable, options include:
-    # created_at, description, entities, id, location, name,
-    # pinned_tweet_id, profile_image_url, protected,
-    # public_metrics, url, username, verified, and withheld
     url = "https://api.twitter.com/2/users/by?{}&{}".format(usernames, user_fields)
+    logging.info(f"URL for players {users} created successfully")
     return url
 
 
 def bearer_oauth(r):
-    """
-    Method required by bearer token authentication.
-    """
-
-    r.headers["Authorization"] = f"Bearer {bearer_token}"
+    """ Returns the Bearer token authentication """
+    r.headers["Authorization"] = f"Bearer {pvt_data_config.TWITTER_BEARER_TOKEN}"
     r.headers["User-Agent"] = "v2UserLookupPython"
+    logging.info("Bearer token authentication created successfully")
     return r
 
 
 def connect_to_endpoint(url):
-    response = requests.request("GET", url, auth=bearer_oauth,)
-    print(response.status_code)
+    """ Connects to API endpoint """
+    response = requests.request("GET", url, auth=bearer_oauth, )
+    logging.debug(f"Response status code is {response.status_code} for url {url}")
     if response.status_code != 200:
-        raise Exception(
-            "Request returned an error: {} {}".format(
-                response.status_code, response.text
-            )
-        )
-    return response.json()
+        logging.critical(f"Request failed for url {url}")
+        raise Exception(f"Request returned an error: {response.status_code} {response.text}")
+    else:
+        logging.info(f"Request succeeded for url {url}")
+        return response.json()
 
 
 def return_player_json(users):
+    """ Returns json with players details """
     url = create_url(users)
     json_response = connect_to_endpoint(url)
-    #print(json.dumps(json_response, indent=4, sort_keys=True))
+    logging.info(f'json for users {users} generated successfully')
     return json_response
 
-def return_player_df(users):
-    player_json = return_player_json(users)
-    players_df = pd.DataFrame(columns=['creation_date', 'user_name', 'twitter_id', 'followers_count',
-                                      'following_count', 'tweet_count', 'listed_count', 'description'])
-    for index, dict_ in enumerate(player_json['data']):
 
+def return_player_df(users, ids):
+    """ Converts the json response into a pandas dataframe object """
+    player_json = return_player_json(users)
+    players_df = pd.DataFrame(columns=['player_id', 'creation_date', 'user_name', 'twitter_id', 'followers_count',
+                                       'following_count', 'tweet_count', 'listed_count', 'description'])
+    for index, dict_ in enumerate(player_json['data']):
+        player_id = ids[index]
         creation_date = dict_['created_at']
         user_name = dict_['username']
         twitter_id = dict_['id']
@@ -67,13 +68,14 @@ def return_player_df(users):
         tweet_count = dict_['public_metrics']['tweet_count']
         listed_count = dict_['public_metrics']['listed_count']
         description = dict_['description']
-        players_df.loc[index] = [creation_date, user_name, twitter_id, followers_count,
-                                following_count, tweet_count, listed_count, description]
+        players_df.loc[index] = [player_id, creation_date, user_name, twitter_id, followers_count,
+                                 following_count, tweet_count, listed_count, description]
     return players_df
 
-def get_all_players_id_web():
-    """OFFLINE"""
-    """Returns table with players' name and twitter ID"""
+
+def _get_all_players_id_web():
+    """ Returns table with players' name and twitter ID """
+    """ OFFLINE - using get_all_players_id_file instead, keeping this one for future use """
     df_players = pd.read_html('https://www.basketball-reference.com/friv/twitter.html')
     df_players = df_players[0]
     df_players = df_players[df_players['Twitter'] != '']
@@ -81,16 +83,8 @@ def get_all_players_id_web():
     return df_players
 
 
-def get_all_players_id_file():
-    """Returns table with players' unique id"""
-
-
-
-def twitter_accounts():
-    """
-    creates a csv file with players twitter accounts url extension
-    :return: None
-    """
+def get_twitter_accounts():
+    """ Creates a csv file with players_id and players twitter account name """
     # get request of twitter info from Basketball-Reference.com
     url = config.TWITTER_ADDRESSED_LIST
     response = requests.get(url)
@@ -142,24 +136,70 @@ def twitter_accounts():
                 logging.error(f"Could not save data of player {row[0]}, Details of exception: {exc}")
 
 
-if __name__ == "__main__":
-    df_info = pd.DataFrame(columns=['creation_date', 'user_name', 'twitter_id', 'followers_count',
-                                      'following_count', 'tweet_count', 'listed_count', 'description'])
-    players = get_all_players_id()
-    twitter_accounts = players['Twitter'].tolist()
-    limit = 100
+def get_all_players_id_file():
+    """Returns table with players' unique id"""
+    # runs function that generates the csv file
+    try:
+        get_twitter_accounts()
+    except Exception as exc:
+        logging.critical(f"Could not generate file with players twitter accounts, exception: {exc}")
+
+    # reads the csv file, filters for empty/null values
+    filename = 'twitter_addresses.csv'
+    if filename in os.listdir():
+        df_players = pd.read_csv(filename)
+        df_players = df_players[df_players['twitter_address'] != '']
+        df_players = df_players[~df_players['twitter_address'].isna()]
+        logging.info(f"File with players twitter details was read successfully")
+        return df_players
+    else:
+        logging.critical(f"Could not generate file with players twitter accounts")
+
+
+def export_players_twitter_data():
+
+    try:
+        players = get_all_players_id_file()
+        player_ids = players['player_id'].tolist()
+        twitter_ids = players['twitter_address'].tolist()
+    except Exception as exc:
+        logging.critical(f'Could not retrieve players twitter accounts, exception {exc}')
+
+    limit = config.TWITTER_USERS_LIMIT_API
     start = 0
     end = limit
 
+    df_info = pd.DataFrame(columns=['player_id', 'creation_date', 'user_name', 'twitter_id', 'followers_count',
+                                    'following_count', 'tweet_count', 'listed_count', 'description'])
+
     while True:
-        print(start, end)
-        users = twitter_accounts[start:end]
+        ids = player_ids[start:end]
+        users = twitter_ids[start:end]
         if len(users) == 0:
             break
-        players_df = return_player_df(users)
-        df_info = pd.concat([df_info, players_df])
+
+        try:
+            players_df = return_player_df(users, ids)
+            df_info = pd.concat([df_info, players_df])
+        except Exception as exc:
+            logging.critical(f'Could not generate dataframe with the info for players {ids}, exception {exc}')
+            break
 
         start += limit
         end += limit
 
-    df_info.to_csv('twitter_details2.csv')
+    try:
+        df_info.to_csv('twitter_details.csv', index=None)
+        logging.info('File with twitter data for players exported successfully')
+    except Exception as exc:
+        logging.critical(f'Could not export file with players twitter details, exception {exc}')
+        raise Exception(exc)
+
+
+if __name__ == "__main__":
+    try:
+        export_players_twitter_data()
+    except Exception as exc:
+        logging.error(f'Could not generate file with players twitter data, exception {exc}')
+
+

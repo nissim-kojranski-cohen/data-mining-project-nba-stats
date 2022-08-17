@@ -2,11 +2,8 @@ import requests
 import os
 import json
 import pandas as pd
-pd.set_option('display.max_columns', 500)
 
-# To set your enviornment variables in your terminal run the following line:
-# export 'BEARER_TOKEN'='<your_bearer_token>'
-TOKEN = "AAAAAAAAAAAAAAAAAAAAAFj9fwEAAAAAdVHgGmMH56%2BloRMa0HkKXGV%2FW5E%3DxRXj73PMqXSpFNjQFFlAaKiIA8mGKa17n2DIfWxtjhL0kquEj2"
+TOKEN = "AAAAAAAAAAAAAAAAAAAAAFj9fwEAAAAALn3C3fhbxF9eFnPtE13yL5LLjI8%3D9gxlzjWtbsXOn8qN5367rbQ9iggDy170crEEvC0eRsA1n9QQ1l"
 bearer_token = TOKEN
 
 
@@ -70,12 +67,19 @@ def return_player_df(users):
                                 following_count, tweet_count, listed_count, description]
     return players_df
 
-def get_all_players_id():
+def get_all_players_id_web():
+    """OFFLINE"""
+    """Returns table with players' name and twitter ID"""
     df_players = pd.read_html('https://www.basketball-reference.com/friv/twitter.html')
     df_players = df_players[0]
     df_players = df_players[df_players['Twitter'] != '']
     df_players = df_players[~df_players['Twitter'].isna()]
     return df_players
+
+def get_all_players_id_file():
+    """Returns table with players' unique id"""
+
+
 
 if __name__ == "__main__":
     df_info = pd.DataFrame(columns=['creation_date', 'user_name', 'twitter_id', 'followers_count',

@@ -219,6 +219,7 @@ def to_teams_table():
                       ('UTA', 'Utah Jazz'),
                       ('WAS', 'Washington Wizards')]
 
+    execute_query('DELETE FROM teams')
     col_num = '%s, ' * len(teams_tup_list[0])
     stmt = f"INSERT INTO teams VALUES ({col_num[:-2]})"
     execute_query(stmt, executemany=True, tup_list=teams_tup_list)
@@ -249,7 +250,7 @@ def write_to_tables():
     write_file_types(onlyfiles, db_func=to_players_table, startswith='players', endswith='.csv')
     write_file_types(onlyfiles, db_func=to_stats_table, startswith='sample', endswith='.csv')
     write_file_types(onlyfiles, db_func=to_twitter_table, startswith='twitter_details', endswith='.csv')
-    
+
 
 if __name__ == "__main__":
     write_to_tables()

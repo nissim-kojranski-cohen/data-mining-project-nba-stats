@@ -48,7 +48,7 @@ def create_database(host, user, password, database_name):
     """
     connection = create_connection(host, user, password)
     with connection.cursor() as cursor:
-        sql = f"CREATE DATABASE {database_name}"
+        sql = f"CREATE DATABASE IF NOT EXISTS {database_name}"
         cursor.execute(sql)
 
 
@@ -62,9 +62,10 @@ def create_table_players(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE players (
-            player_id varchar(100) primary key,
-            name varchar(100))"""
+        sql = """CREATE TABLE IF NOT EXISTS players (
+            player_id varchar(100) not null,
+            name varchar(100),
+            primary key (player_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -79,8 +80,8 @@ def create_table_players_info(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE players_info (
-              player_id varchar(100),
+        sql = """CREATE TABLE IF NOT EXISTS players_info (
+              player_id varchar(100) not null,
               team_id varchar(100),
               age int,
               height decimal(18,9),
@@ -89,7 +90,8 @@ def create_table_players_info(host, user, password, database_name):
               country varchar(100),
               draft_year int,
               draft_round int,
-              draft_number int)"""
+              draft_number int,
+              primary key (player_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -104,9 +106,10 @@ def create_table_teams(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE teams (
-              team_id varchar(100),
-              name varchar(100))"""
+        sql = """CREATE TABLE IF NOT EXISTS teams (
+              team_id varchar(100) not null,
+              name varchar(100),
+              primary key (team_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -121,8 +124,8 @@ def create_table_stats_per_game(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE stats_per_game (
-              player_id varchar(100),
+        sql = """CREATE TABLE IF NOT EXISTS stats_per_game (
+              player_id varchar(100) not null,
               pos varchar(100),
               team_season varchar(100),
               season int,
@@ -150,7 +153,9 @@ def create_table_stats_per_game(host, user, password, database_name):
               blk_per_g decimal(18,9),
               tov_per_g decimal(18,9),
               pf_per_g decimal(18,9),
-              pts_per_g decimal(18,9))"""
+              pts_per_g decimal(18,9),
+              foreign key (player_id) references players(player_id),
+              foreign key (team_season) references teams(team_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -165,8 +170,8 @@ def create_table_stats_per_minute(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE stats_per_minute (
-              player_id varchar(100),
+        sql = """CREATE TABLE IF NOT EXISTS stats_per_minute (
+              player_id varchar(100) not null,
               pos varchar(100),
               team_season varchar(100),
               season int,
@@ -193,7 +198,9 @@ def create_table_stats_per_minute(host, user, password, database_name):
               blk_per_mp decimal(18,9),
               tov_per_mp decimal(18,9),
               pf_per_mp decimal(18,9),
-              pts_per_mp decimal(18,9))"""
+              pts_per_mp decimal(18,9),
+              foreign key (player_id) references players(player_id),
+              foreign key (team_season) references teams(team_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -208,8 +215,8 @@ def create_table_stats_per_poss(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE stats_per_poss (
-              player_id varchar(100),
+        sql = """CREATE TABLE IF NOT EXISTS stats_per_poss (
+              player_id varchar(100) not null,
               pos varchar(100),
               team_season varchar(100),
               season int,
@@ -238,7 +245,9 @@ def create_table_stats_per_poss(host, user, password, database_name):
               pf_per_poss decimal(18,9),
               pts_per_poss decimal(18,9),
               off_rtg decimal(18,9),
-              def_rtg decimal(18,9))"""
+              def_rtg decimal(18,9),
+              foreign key (player_id) references players(player_id),
+              foreign key (team_season) references teams(team_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -253,8 +262,8 @@ def create_table_stats_totals(host, user, password, database_name):
     """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE stats_totals (
-              player_id varchar(100),
+        sql = """CREATE TABLE IF NOT EXISTS stats_totals (
+              player_id varchar(100) not null,
               pos varchar(100),
               team_season varchar(100),
               season int,
@@ -282,9 +291,12 @@ def create_table_stats_totals(host, user, password, database_name):
               blk decimal(18,9),
               tov decimal(18,9),
               pf decimal(18,9),
-              pts decimal(18,9))"""
+              pts decimal(18,9),
+              foreign key (player_id) references players(player_id),
+              foreign key (team_season) references teams(team_id))"""
         cursor.execute(sql)
     connection.commit()
+
 
 def create_table_twitter_details(host, user, password, database_name):
     """
@@ -296,8 +308,8 @@ def create_table_twitter_details(host, user, password, database_name):
         """
     connection = create_connection_db(host, user, password, database_name)
     with connection.cursor() as cursor:
-        sql = """CREATE TABLE twitter_details (
-                  player_id varchar(100),
+        sql = """CREATE TABLE IF NOT EXISTS twitter_details (
+                  player_id varchar(100) not null,
                   creation_date date,
                   user_name varchar(100),
                   twitter_id varchar(100),
@@ -305,9 +317,11 @@ def create_table_twitter_details(host, user, password, database_name):
                   following_count bigint,
                   tweet_count bigint,
                   listed_count bigint,
-                  description varchar(500))"""
+                  description varchar(500),
+                  foreign key (player_id) references players(player_id))"""
         cursor.execute(sql)
     connection.commit()
+
 
 def database_exists(host, user, password, database_name):
     """
@@ -347,69 +361,33 @@ def build_database_with_tables(host=pvt_data_config.HOST, user=pvt_data_config.U
     :param database_name: name of the database
     """
     # Checks if database exists before creating
-    if database_exists(host=host, user=user, password=password, database_name=database_name):
-        logging.info(f'Database {database_name} already exists so it will not be created')
-    else:
-        logging.info(f'Database {database_name} does not exist so it will be created')
-        create_database(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Database {database_name} created successfully')
+    create_database(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Database created successfully')
 
-    # For each table check if exists before creating
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='players'):
-        logging.info(f'Table players already exists so it will not be created')
-    else:
-        logging.info(f'Table players already exists will be created')
-        create_table_players(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table players created successfully')
+    # Creates each table (if it exists or not is verified within the query)
+    create_table_players(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table players created successfully')
 
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='players_info'):
-        logging.info(f'Table players_info already exists so it will not be created')
-    else:
-        logging.info(f'Table players_info already exists will be created')
-        create_table_players_info(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table players_info created successfully')
+    create_table_players_info(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table players_info created successfully')
 
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='teams'):
-        logging.info(f'Table teams already exists so it will not be created')
-    else:
-        logging.info(f'Table teams already exists will be created')
-        create_table_teams(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table teams created successfully')
+    create_table_teams(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table teams created successfully')
 
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='stats_per_game'):
-        logging.info(f'Table stats_per_game already exists so it will not be created')
-    else:
-        logging.info(f'Table stats_per_game already exists will be created')
-        create_table_stats_per_game(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table stats_per_game created successfully')
+    create_table_stats_per_game(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table stats_per_game created successfully')
 
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='stats_per_minute'):
-        logging.info(f'Table stats_per_minute already exists so it will not be created')
-    else:
-        logging.info(f'Table stats_per_minute already exists will be created')
-        create_table_stats_per_minute(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table stats_per_minute created successfully')
+    create_table_stats_per_minute(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table stats_per_minute created successfully')
 
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='stats_per_poss'):
-        logging.info(f'Table stats_per_poss already exists so it will not be created')
-    else:
-        logging.info(f'Table stats_per_poss already exists will be created')
-        create_table_stats_per_poss(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table stats_per_poss created successfully')
+    create_table_stats_per_poss(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table stats_per_poss created successfully')
 
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='stats_totals'):
-        logging.info(f'Table stats_totals already exists so it will not be created')
-    else:
-        logging.info(f'Table stats_totals already exists will be created')
-        create_table_stats_totals(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table stats_totals created successfully')
+    create_table_stats_totals(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table stats_totals created successfully')
 
-    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='twitter_details'):
-        logging.info(f'Table twitter_details already exists so it will not be created')
-    else:
-        logging.info(f'Table twitter_details already exists will be created')
-        create_table_twitter_details(host=host, user=user, password=password, database_name=database_name)
-        logging.info(f'Table twitter_details created successfully')
+    create_table_twitter_details(host=host, user=user, password=password, database_name=database_name)
+    logging.info(f'Table twitter_details created successfully')
 
 
 if __name__ == "__main__":

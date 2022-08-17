@@ -245,8 +245,8 @@ def write_to_tables():
     onlyfiles = [f for f in os.listdir(current_path) if os.path.isfile(os.path.join(current_path, f))]
 
     # insert csv files data to mysql database, for each table type
-    write_file_types(onlyfiles, db_func=to_stats_table, startswith='sample', endswith='.csv')
     write_file_types(onlyfiles, db_func=to_players_table, startswith='players', endswith='.csv')
+    write_file_types(onlyfiles, db_func=to_stats_table, startswith='sample', endswith='.csv')
     write_file_types(onlyfiles, db_func=to_twitter_table, startswith='twitter_details', endswith='.csv')
     to_teams_table()
 

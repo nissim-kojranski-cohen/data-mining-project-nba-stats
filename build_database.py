@@ -154,8 +154,7 @@ def create_table_stats_per_game(host, user, password, database_name):
               tov_per_g decimal(18,9),
               pf_per_g decimal(18,9),
               pts_per_g decimal(18,9),
-              foreign key (player_id) references players(player_id),
-              foreign key (team_season) references teams(team_id))"""
+              foreign key (player_id) references players(player_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -199,8 +198,7 @@ def create_table_stats_per_minute(host, user, password, database_name):
               tov_per_mp decimal(18,9),
               pf_per_mp decimal(18,9),
               pts_per_mp decimal(18,9),
-              foreign key (player_id) references players(player_id),
-              foreign key (team_season) references teams(team_id))"""
+              foreign key (player_id) references players(player_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -246,8 +244,7 @@ def create_table_stats_per_poss(host, user, password, database_name):
               pts_per_poss decimal(18,9),
               off_rtg decimal(18,9),
               def_rtg decimal(18,9),
-              foreign key (player_id) references players(player_id),
-              foreign key (team_season) references teams(team_id))"""
+              foreign key (player_id) references players(player_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -292,8 +289,7 @@ def create_table_stats_totals(host, user, password, database_name):
               tov decimal(18,9),
               pf decimal(18,9),
               pts decimal(18,9),
-              foreign key (player_id) references players(player_id),
-              foreign key (team_season) references teams(team_id))"""
+              foreign key (player_id) references players(player_id))"""
         cursor.execute(sql)
     connection.commit()
 
@@ -318,7 +314,7 @@ def create_table_twitter_details(host, user, password, database_name):
                   tweet_count bigint,
                   listed_count bigint,
                   description varchar(500),
-                  foreign key (player_id) references players(player_id))"""
+                  primary key (player_id))"""
         cursor.execute(sql)
     connection.commit()
 

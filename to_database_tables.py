@@ -27,6 +27,7 @@ def execute_query(query, executemany=False, tup_list=None):
             if not executemany:
                 cursor.execute(sql)
                 result = cursor.fetchall()
+                connection.commit()
                 return result
             # execute many queries
             else:
@@ -176,7 +177,7 @@ def to_twitter_table(filename):
             row_data = generate_row(player_data, varchar_cols=varchar_cols, omited_cols=omited_cols)
 
             # checking if sample is in database, only new data is stored
-            if (row_data[0]) in in_db:
+            if (row_data[0],) in in_db:
                 pass
             else:
                 # saving the row data to tuple and storing in tup_list

@@ -213,6 +213,7 @@ def export_players_twitter_data():
         end += limit
 
     try:
+        df_info = df_info.drop_duplicates()
         df_info.to_csv('twitter_details.csv', index=None)
         logging.info('File with twitter data for players exported successfully')
     except Exception as exc:

@@ -18,6 +18,7 @@ def caller(year_start, year_end):
     print('Starting to_database_tables')
     to_database_tables.write_to_tables()
 
+
 def generate_data():
     my_parser = argparse.ArgumentParser()
 

@@ -5,3 +5,4 @@ venv_data_mining
 project_details.txt
 *.exe
 pvt_data_config.py
+*ipynb*

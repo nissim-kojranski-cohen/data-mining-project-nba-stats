@@ -53,14 +53,15 @@ def return_player_json(users):
     return json_response
 
 
-def return_player_df(users, ids):
+def return_player_df(users, players_dict):
     """ Converts the json response into a pandas dataframe object """
     player_json = return_player_json(users)
+
     players_df = pd.DataFrame(columns=['player_id', 'creation_date', 'user_name', 'twitter_id', 'followers_count',
                                        'following_count', 'tweet_count', 'listed_count', 'description'])
     for index, dict_ in enumerate(player_json['data']):
-        player_id = ids[index]
-        creation_date = dict_['created_at']
+        # extracts data from the json file
+        creation_date = dict_['created_at'][:10]
         user_name = dict_['username']
         twitter_id = dict_['id']
         followers_count = dict_['public_metrics']['followers_count']
@@ -68,6 +69,11 @@ def return_player_df(users, ids):
         tweet_count = dict_['public_metrics']['tweet_count']
         listed_count = dict_['public_metrics']['listed_count']
         description = dict_['description']
+
+        # json might come out of order, we use the dictionary to get the player id for the equivalent twitter account
+
+        player_id = players_dict[user_name.lower()]
+
         players_df.loc[index] = [player_id, creation_date, user_name, twitter_id, followers_count,
                                  following_count, tweet_count, listed_count, description]
     return players_df
@@ -156,12 +162,30 @@ def get_all_players_id_file():
         logging.critical(f"Could not generate file with players twitter accounts")
 
 
+def df_to_dict(df, reverse_order=False, lowercase_all=True):
+    """ Transforms a 2 column dataframe (col1, col2) into a dictionary with {col1: col2}"""
+    if not reverse_order:
+        col1 = df.columns[0]
+        col2 = df.columns[1]
+    else:
+        col1 = df.columns[1]
+        col2 = df.columns[0]
+
+    dict_ = {}
+    for index, row in df.iterrows():
+        if lowercase_all:
+            dict_[row[col1].lower()] = row[col2.lower()]
+        else:
+            dict_[row[col1]] = row[col2]
+    return dict_
+
+
 def export_players_twitter_data():
 
     try:
         players = get_all_players_id_file()
-        player_ids = players['player_id'].tolist()
         twitter_ids = players['twitter_address'].tolist()
+        players_dict = df_to_dict(players, reverse_order=True)
     except Exception as exc:
         logging.critical(f'Could not retrieve players twitter accounts, exception {exc}')
 
@@ -173,16 +197,16 @@ def export_players_twitter_data():
                                     'following_count', 'tweet_count', 'listed_count', 'description'])
 
     while True:
-        ids = player_ids[start:end]
+        # players that we'll do the request for
         users = twitter_ids[start:end]
         if len(users) == 0:
             break
 
         try:
-            players_df = return_player_df(users, ids)
+            players_df = return_player_df(users, players_dict)
             df_info = pd.concat([df_info, players_df])
         except Exception as exc:
-            logging.critical(f'Could not generate dataframe with the info for players {ids}, exception {exc}')
+            logging.critical(f'Could not generate dataframe with the info for players {users}, exception {exc}')
             break
 
         start += limit

@@ -1,6 +1,6 @@
 import pymysql
 import config
-import sql_config
+import pvt_data_config
 import pandas as pd
 import logging
 
@@ -286,6 +286,28 @@ def create_table_stats_totals(host, user, password, database_name):
         cursor.execute(sql)
     connection.commit()
 
+def create_table_twitter_details(host, user, password, database_name):
+    """
+        Creates table 'twitter_details' in the database
+        :param host: name of the host
+        :param user: name of the user
+        :param password: MySQL password
+        :param database_name: name of the database
+        """
+    connection = create_connection_db(host, user, password, database_name)
+    with connection.cursor() as cursor:
+        sql = """CREATE TABLE twitter_details (
+                  player_id varchar(100),
+                  creation_date date,
+                  user_name varchar(100),
+                  twitter_id varchar(100),
+                  followers_count bigint,
+                  following_count bigint,
+                  tweet_count bigint,
+                  listed_count bigint,
+                  description varchar(500))"""
+        cursor.execute(sql)
+    connection.commit()
 
 def database_exists(host, user, password, database_name):
     """
@@ -313,7 +335,7 @@ def table_exists(host, user, password, database_name, table_name):
     return True if table_name in df[f'Tables_in_{database_name}'].tolist() else False
 
 
-def build_database_with_tables(host=sql_config.HOST, user=sql_config.USER, password=sql_config.PASSWORD,
+def build_database_with_tables(host=pvt_data_config.HOST, user=pvt_data_config.USER, password=pvt_data_config.PASSWORD,
                                database_name=config.DATABASE_NAME):
     """
     Executes all commands to build the database schema for nba_data
@@ -382,7 +404,14 @@ def build_database_with_tables(host=sql_config.HOST, user=sql_config.USER, passw
         create_table_stats_totals(host=host, user=user, password=password, database_name=database_name)
         logging.info(f'Table stats_totals created successfully')
 
+    if table_exists(host=host, user=user, password=password, database_name=database_name, table_name='twitter_details'):
+        logging.info(f'Table twitter_details already exists so it will not be created')
+    else:
+        logging.info(f'Table twitter_details already exists will be created')
+        create_table_twitter_details(host=host, user=user, password=password, database_name=database_name)
+        logging.info(f'Table twitter_details created successfully')
+
 
 if __name__ == "__main__":
-    build_database_with_tables(host=sql_config.HOST, user=sql_config.USER, password=sql_config.PASSWORD,
+    build_database_with_tables(host=pvt_data_config.HOST, user=pvt_data_config.USER, password=pvt_data_config.PASSWORD,
                                database_name=config.DATABASE_NAME)

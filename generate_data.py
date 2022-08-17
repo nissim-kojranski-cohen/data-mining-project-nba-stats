@@ -3,6 +3,7 @@ import web_scraping_players_stats
 import web_scraping_players_info
 import build_database
 import to_database_tables
+import twitter_info
 
 
 def caller(year_start, year_end):
@@ -10,6 +11,8 @@ def caller(year_start, year_end):
     web_scraping_players_stats.export_players_stats(year_start, year_end)
     print('Starting web_scraping_players_info')
     web_scraping_players_info.export_players_info(year_start, year_end)
+    print('Starting twitter_info')
+    twitter_info.export_players_twitter_data()
     print('Starting build_database')
     build_database.build_database_with_tables()
     print('Starting to_database_tables')

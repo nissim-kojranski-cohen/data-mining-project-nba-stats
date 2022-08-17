@@ -11,3 +11,4 @@ FEET_TO_CM = 30.48
 INCHES_TO_CM = 2.54
 POUNDS_TO_KG = 0.453592
 WAITING_TIME_SELENIUM = 60
+TWITTER_ADDRESSED_LIST = "https://www.basketball-reference.com/friv/twitter.html"

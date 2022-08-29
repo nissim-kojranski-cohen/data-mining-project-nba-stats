@@ -4,6 +4,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 import config
 from web_scraping_players_stats import get_html, parse_html
 
@@ -67,7 +70,11 @@ def get_nba_players_data(season, df_ids):
 
     # have to download chrome driver according to your chrome version (https://chromedriver.chromium.org/downloads)
     try:
-        driver = webdriver.Chrome('chromedriver.exe')
+        options = Options()
+        options.headless = True
+        options.add_argument('--window-size=1920,1080')  # otherwise wont work in headless mode, a bug
+        service = Service(executable_path=ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
     except Exception as exc:
         print('ERROR: Could not initialize chrome driver')
         logging.critical(f'Could not initialize chrome driver, program will be terminated')

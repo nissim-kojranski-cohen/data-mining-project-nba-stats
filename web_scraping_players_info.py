@@ -9,7 +9,8 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import config
 from web_scraping_players_stats import get_html, parse_html
-
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 pd.set_option('display.max_columns', 500)
 logging.basicConfig(filename='nba_web_scrapping.log', encoding='utf-8', level=logging.INFO, format=config.LOG_FORMAT)
@@ -62,7 +63,7 @@ def get_nba_players_data(season, df_ids):
     :param df_ids: DataFrame with 2 columns: player_id and player (name of the player)
     :return:
     """
-    season_abrev = int(str(season)[2:])
+    season_abrev = str(season)[2:]
     season_start = season - 1
     logging.debug(f'Opening NBA website to extract players information for season {season_start}/{season_abrev}')
     url = f'https://www.nba.com/stats/players/bio/?Season={season_start}-{season_abrev}&SeasonType=Regular%20Season'
@@ -70,11 +71,12 @@ def get_nba_players_data(season, df_ids):
 
     # have to download chrome driver according to your chrome version (https://chromedriver.chromium.org/downloads)
     try:
-        options = Options()
-        options.headless = True
-        options.add_argument('--window-size=1920,1080')  # otherwise wont work in headless mode, a bug
-        service = Service(executable_path=ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
+        chrome_options.add_argument(f'user-agent={user_agent}')
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+
     except Exception as exc:
         print('ERROR: Could not initialize chrome driver')
         logging.critical(f'Could not initialize chrome driver, program will be terminated')
@@ -82,14 +84,13 @@ def get_nba_players_data(season, df_ids):
 
     try:
         driver.get(url)
-        driver.maximize_window()
         logging.info(f'Opened url {url} successfully')
     except Exception as exc:
         print(f'Could not open requested url: {url}')
         logging.critical(f'Could not open requested url: {url}, program will be terminated')
         raise Exception(exc)
 
-    xpath_dropdown_pages = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div'
+    xpath_dropdown_pages = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div/select'
     try:
         dropdown_pages = WebDriverWait(driver, config.WAITING_TIME_SELENIUM).until(
             EC.visibility_of_element_located((By.XPATH,
@@ -123,10 +124,10 @@ def get_nba_players_data(season, df_ids):
         else:
             df = pd.concat([df, tmp_df])
 
-        if page_num == num_pages:
+        if page_num > num_pages:
             break
         else:
-            next_xpath = '/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div/a[2]'
+            next_xpath = f'/html/body/main/div/div/div[2]/div/div/nba-stat-table/div[1]/div/div/select/option[{page_num+1}]'
             try:
                 next_button = WebDriverWait(driver, config.WAITING_TIME_SELENIUM).until(
                     EC.visibility_of_element_located((By.XPATH, next_xpath)))
